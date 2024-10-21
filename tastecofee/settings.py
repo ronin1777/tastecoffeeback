@@ -31,7 +31,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')  # بارگذاری از فایل .env
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG') == 'True'  # تبدیل به بولین
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = '*'
 
 
 # Application definition
@@ -242,3 +242,22 @@ BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000/')
 ZARINPAL_MERCHANT_ID = os.getenv('ZARINPAL_MERCHANT_ID')
 ZARINPAL_STARTPAY_URL = os.getenv('ZARINPAL_STARTPAY_URL')
 ZARINPAL_VERIFY_URL = os.getenv('ZARINPAL_VERIFY_URL')
+
+print(os.environ.get('DATABASE_URL'))
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        },
+    },
+}
