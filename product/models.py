@@ -96,12 +96,20 @@ class ProductImage(models.Model):
     image_type = models.CharField(max_length=20, choices=IMAGE_TYPES, default=PRIMARY)
 
     def clean(self):
-
-        existing_images = ProductImage.objects.filter(product=self.product, image_type=self.image_type).exclude(id=self.id)
+        if not self.product.id:  # بررسی ذخیره بودن محصول
+            return
+        
+        existing_images = ProductImage.objects.filter(
+            product=self.product,
+            image_type=self.image_type
+        ).exclude(id=self.id)
+        
         if existing_images.exists():
-            raise ValidationError(f"محصول قبلا یک تصویر{self.get_image_type_display()} داشته است.")
+            raise ValidationError(f"محصول قبلا یک تصویر {self.get_image_type_display()} داشته است.")
 
     def save(self, *args, **kwargs):
+        if self.product is not None and self.product.id is None:
+            return  # جلوگیری از ذخیره قبل از ذخیره محصول
         self.clean()
         super(ProductImage, self).save(*args, **kwargs)
 
