@@ -28,6 +28,7 @@ et-xmlfile==1.1.0
 factory_boy==3.3.1
 Faker==30.0.0
 filetype==1.2.0
+gunicorn==23.0.0
 idna==3.4
 inflection==0.5.1
 jsonschema==4.23.0
@@ -36,6 +37,7 @@ kavenegar==1.1.2
 l18n==2021.3
 laces==0.1.1
 openpyxl==3.1.5
+packaging==24.1
 pillow==10.4.0
 pillow_heif==0.18.0
 psycopg2-binary==2.9.10
@@ -60,4 +62,3 @@ urllib3==2.1.0
 wagtail==6.2.2
 Willow==1.8.0
 zarinpal==1.0.0
-gunicorn=23.0.0
