@@ -60,5 +60,6 @@ typing_extensions==4.8.0
 uritemplate==4.1.1
 urllib3==2.1.0
 wagtail==6.2.2
+whitenoise==6.7.0
 Willow==1.8.0
 zarinpal==1.0.0

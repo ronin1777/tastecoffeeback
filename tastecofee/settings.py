@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'django_ratelimit',
     'django_filters',
+    'whitenoise',
 
 
 
@@ -70,7 +71,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     "corsheaders.middleware.CorsMiddleware",
 
     'django.middleware.common.CommonMiddleware',
@@ -233,19 +234,21 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = BASE_DIR / 'static/contents'
 
-MEDIA_URL = '/media/'
+MEDIA_URL = '/contents/'
 
-BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000/')
+BASE_URL = os.getenv('BASE_URL', 'https://tastecoffee.darkube.app/')
 
 
 ZARINPAL_MERCHANT_ID = os.getenv('ZARINPAL_MERCHANT_ID')
