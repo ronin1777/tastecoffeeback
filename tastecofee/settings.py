@@ -239,8 +239,8 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-MEDIA_URL = '/contents/'
-MEDIA_ROOT = BASE_DIR / 'static/contents'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -251,7 +251,7 @@ ZARINPAL_MERCHANT_ID = os.getenv('ZARINPAL_MERCHANT_ID')
 ZARINPAL_STARTPAY_URL = os.getenv('ZARINPAL_STARTPAY_URL')
 ZARINPAL_VERIFY_URL = os.getenv('ZARINPAL_VERIFY_URL')
 
-print(os.environ.get('DATABASE_URL'))
+
 
 
 LOGGING = {
