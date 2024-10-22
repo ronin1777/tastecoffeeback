@@ -27,7 +27,7 @@ RUN pip install --upgrade pip \
 COPY . .
 
 # Collect static files (if applicable)
-RUN python manage.py collectstatic --noinput
+# RUN python manage.py collectstatic --noinput
 
 # Make migrations (optional, you may skip this if you manage migrations elsewhere)
 RUN python manage.py migrate
