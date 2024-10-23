@@ -234,12 +234,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+
 STATICFILES_DIRS = [
     BASE_DIR / 'static'
 ]
 
-MEDIA_URL = '/media/'
+
 MEDIA_ROOT = BASE_DIR / "media"
 
 LIARA_ENDPOINT = os.getenv("LIARA_ENDPOINT")
@@ -252,6 +252,8 @@ AWS_SECRET_ACCESS_KEY = LIARA_SECRET_KEY
 AWS_STORAGE_BUCKET_NAME = LIARA_BUCKET_NAME
 AWS_S3_ENDPOINT_URL = LIARA_ENDPOINT
 AWS_S3_REGION_NAME = 'us-east-1'
+AWS_S3_CUSTOM_DOMAIN = f"{LIARA_BUCKET_NAME}.{LIARA_ENDPOINT}"
+
 
 STORAGES = {
     "default": {
@@ -261,7 +263,9 @@ STORAGES = {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
-
+STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
