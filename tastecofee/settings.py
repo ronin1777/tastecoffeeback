@@ -201,18 +201,19 @@ SPECTACULAR_SETTINGS = {
 SITE_ID = 1
 
 # تنظیمات کش
+REDIS_URL = os.getenv('REDIS_URL', 'redis://a382f1fb-2baa-466d-8d0e-ca4bfe39e1b0.hsvc.ir:32371/1')
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': os.getenv('REDIS_URL'),
+        'LOCATION': REDIS_URL,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'SOCKET_TIMEOUT': 1,
-            'MAX_ENTRIES': 1000,
+            'PASSWORD': REDIS_PASSWORD,
         }
     }
 }
-
 # استفاده از Redis برای سشن‌ها
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_CACHE_ALIAS = 'default'

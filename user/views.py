@@ -27,7 +27,7 @@ from orders.models import Cart
 logger = logging.getLogger(__name__)
 KAVENEGAR_API_KEY = '4C704D6A52324844577148424A3733377A704263503141436E5075455759332F6F704238694F2F78525A773D'
 
-redis_instance = redis.StrictRedis(host='127.0.0.1', port=6379, db=1)
+redis_instance = redis.StrictRedis(host='a382f1fb-2baa-466d-8d0e-ca4bfe39e1b0.hsvc.ir', port=32371, db=1, password='JNXUmTdiGFZ5gUTlk2GSe8nGMvvtXLwF')
 
 
 # class SendOtpView(generics.GenericAPIView):
