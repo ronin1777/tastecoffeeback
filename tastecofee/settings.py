@@ -31,7 +31,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')  # بارگذاری از فایل .env
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG') == 'True'  # تبدیل به بولین
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -72,7 +72,6 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-
     "corsheaders.middleware.CorsMiddleware",
 
     'django.middleware.common.CommonMiddleware',
@@ -202,19 +201,18 @@ SPECTACULAR_SETTINGS = {
 SITE_ID = 1
 
 # تنظیمات کش
-REDIS_URL = os.getenv('REDIS_URL', 'redis://a382f1fb-2baa-466d-8d0e-ca4bfe39e1b0.hsvc.ir:32371/0')
-REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
-
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL,
+        'LOCATION': os.getenv('REDIS_URL'),
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'PASSWORD': REDIS_PASSWORD,
+            'SOCKET_TIMEOUT': 1,
+            'MAX_ENTRIES': 1000,
         }
     }
 }
+
 # استفاده از Redis برای سشن‌ها
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_CACHE_ALIAS = 'default'
