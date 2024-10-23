@@ -51,8 +51,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'django_ratelimit',
     'django_filters',
-
-    'storages',
+    'whitenoise',
 
 
 
@@ -72,7 +71,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     "corsheaders.middleware.CorsMiddleware",
 
     'django.middleware.common.CommonMiddleware',
@@ -234,38 +233,23 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [
-    BASE_DIR / 'static'
+    BASE_DIR / "static",
 ]
 
-# MEDIA FILES
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-LIARA_ENDPOINT = os.getenv("LIARA_ENDPOINT")
-LIARA_BUCKET_NAME = os.getenv("LIARA_BUCKET_NAME")
-LIARA_ACCESS_KEY = os.getenv("LIARA_ACCESS_KEY")
-LIARA_SECRET_KEY = os.getenv("LIARA_SECRET_KEY")
-
+MEDIA_ROOT = BASE_DIR / "media"
 
 STORAGES = {
     "default": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-        "OPTIONS": {
-            'access_key': LIARA_ACCESS_KEY,
-            'secret_key': LIARA_SECRET_KEY,
-            'endpoint_url': LIARA_ENDPOINT,
-            'bucket_name': LIARA_BUCKET_NAME,
-            'file_overwrite': False,
-
-        },
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
-
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -297,3 +281,36 @@ LOGGING = {
         },
     },
 }
+
+
+# STATIC_URL = 'static/'
+# STATICFILES_DIRS = [
+#     BASE_DIR / 'static'
+# ]
+
+# # MEDIA FILES
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = BASE_DIR / 'media'
+
+# LIARA_ENDPOINT = os.getenv("LIARA_ENDPOINT")
+# LIARA_BUCKET_NAME = os.getenv("LIARA_BUCKET_NAME")
+# LIARA_ACCESS_KEY = os.getenv("LIARA_ACCESS_KEY")
+# LIARA_SECRET_KEY = os.getenv("LIARA_SECRET_KEY")
+
+
+# STORAGES = {
+#     "default": {
+#         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+#         "OPTIONS": {
+#             'access_key': LIARA_ACCESS_KEY,
+#             'secret_key': LIARA_SECRET_KEY,
+#             'endpoint_url': LIARA_ENDPOINT,
+#             'bucket_name': LIARA_BUCKET_NAME,
+#             'file_overwrite': False,
+
+#         },
+#     },
+#     "staticfiles": {
+#         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+#     },
+# }
