@@ -31,7 +31,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')  # بارگذاری از فایل .env
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG') == 'True'  # تبدیل به بولین
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -72,6 +72,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+
     "corsheaders.middleware.CorsMiddleware",
 
     'django.middleware.common.CommonMiddleware',
@@ -201,10 +202,12 @@ SPECTACULAR_SETTINGS = {
 SITE_ID = 1
 
 # تنظیمات کش
+REDIS_URL = os.getenv('REDIS_URL')
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': os.getenv('REDIS_URL'),
+        'LOCATION': REDIS_URL,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'SOCKET_TIMEOUT': 1,
@@ -242,23 +245,9 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
 
-LIARA_ENDPOINT = os.getenv("LIARA_ENDPOINT")
-LIARA_BUCKET_NAME = os.getenv("LIARA_BUCKET_NAME")
-LIARA_ACCESS_KEY = os.getenv("LIARA_ACCESS_KEY")
-LIARA_SECRET_KEY = os.getenv("LIARA_SECRET_KEY")
-
-
 STORAGES = {
     "default": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-        "OPTIONS": {
-            'access_key': LIARA_ACCESS_KEY,
-            'secret_key': LIARA_SECRET_KEY,
-            'endpoint_url': LIARA_ENDPOINT,
-            'bucket_name': LIARA_BUCKET_NAME,
-            'file_overwrite': False,
-
-        },
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
@@ -276,33 +265,7 @@ ZARINPAL_VERIFY_URL = os.getenv('ZARINPAL_VERIFY_URL')
 
 CSRF_TRUSTED_ORIGINS = [
     'https://tastecoffee.darkube.app',
-    'http://localhost:8000',  # اضافه کنید اگر در محیط محلی تست می‌کنید
+    'http://localhost:8000',
 ]
 
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django.db.backends': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-        },
-    },
-}
-
-
-# STATIC_URL = 'static/'
-# STATICFILES_DIRS = [
-#     BASE_DIR / 'static'
-# ]
-
-# # MEDIA FILES
-# MEDIA_URL = '/media/'
-# MEDIA_ROOT = BASE_DIR / 'media'
 
