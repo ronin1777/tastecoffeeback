@@ -142,8 +142,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         # مسیر جدید برای دیتابیس
-        'NAME': os.path.join(BASE_DIR, 'persistent_db', 'db.sqlite3'),
-    }
+        'NAME': 'persistent_db/db.sqlite3',    
+        }
 }
 
 
