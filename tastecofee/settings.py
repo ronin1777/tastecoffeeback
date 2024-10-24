@@ -138,15 +138,13 @@ CKEDITOR_IMAGE_BACKEND = "pillow"
 #         "PORT": os.getenv("DB_PORT"),
 #     }
 # }
-
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join('/persistent_db/', 'db.sqlite3'),  # مسیر mount شده برای دیتابیس SQLite
+        # مسیر جدید برای دیتابیس
+        'NAME': os.path.join(BASE_DIR, 'persistent_db', 'db.sqlite3'),
     }
 }
-
 
 
 # Password validation
