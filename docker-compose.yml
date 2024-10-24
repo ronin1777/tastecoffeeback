@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  web:
+    image: tastecoffee_django:latest
+    build: .
+    command: gunicorn --bind 0.0.0.0:8000 tastecofee.wsgi
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./static:/tastecofee/static
+      - ./media:/tastecofee/media
+      - sqlite_db:/tastecofee/db.sqlite3 # استفاده از ولوم برای دیتابیس
+    depends_on:
+      - db
+
+volumes:
+  sqlite_db:
