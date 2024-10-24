@@ -292,6 +292,7 @@ ZARINPAL_VERIFY_URL = os.getenv('ZARINPAL_VERIFY_URL')
 CSRF_TRUSTED_ORIGINS = [
     'https://tastecoffee.darkube.app',
     'http://localhost:8000',
+    'https://tastecoffee.liara.run/',
 ]
 
 
