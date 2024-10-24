@@ -141,7 +141,7 @@ CKEDITOR_IMAGE_BACKEND = "pillow"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        # مسیر جدید برای دیتابیس
+
         'NAME': 'persistent_db/db.sqlite3',    
         }
 }
