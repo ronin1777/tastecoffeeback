@@ -138,10 +138,6 @@ CKEDITOR_IMAGE_BACKEND = "pillow"
 #         "PORT": os.getenv("DB_PORT"),
 #     }
 # }
-DATA_DIR = os.path.join(BASE_DIR, 'data')
-
-if not os.path.exists(DATA_DIR):
-    os.makedirs(DATA_DIR)
 
 DATABASES = {
     'default': {
@@ -149,6 +145,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
