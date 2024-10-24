@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 
+
 import redis
 # from django_ratelimit.decorators import ratelimit
 # from django_ratelimit.exceptions import Ratelimited
