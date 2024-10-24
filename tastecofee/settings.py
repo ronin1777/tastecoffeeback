@@ -49,9 +49,10 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     "corsheaders",
     'drf_spectacular',
-    'django_ratelimit',
     'django_filters',
     'whitenoise',
+    'ckeditor',
+    'ckeditor_uploader',
 
 
 
@@ -63,8 +64,7 @@ INSTALLED_APPS = [
     'blog.apps.BlogConfig',
     'payment.apps.PaymentConfig',
 
-    'ckeditor',
-    'ckeditor_uploader',
+
 
 ]
 
@@ -127,14 +127,22 @@ CKEDITOR_IMAGE_BACKEND = "pillow"
 # DATABASES = {
 #     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 # }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql_psycopg2",
+#         "NAME": os.getenv("DB_NAME"),
+#         "USER": os.getenv("DB_USER"),
+#         "PASSWORD": os.getenv("DB_PASSWORD"),
+#         "HOST": os.getenv("DB_HOST"),
+#         "PORT": os.getenv("DB_PORT"),
+#     }
+# }
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT"),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.path.join(BASE_DIR, "data", "db.sqlite3"),
     }
 }
 
@@ -165,6 +173,14 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/minute',
+        'user': '100/minute',
+    }
 }
 
 SIMPLE_JWT = {
@@ -201,19 +217,31 @@ SPECTACULAR_SETTINGS = {
 SITE_ID = 1
 
 # تنظیمات کش
-REDIS_URL = os.getenv('REDIS_URL', 'redis://a382f1fb-2baa-466d-8d0e-ca4bfe39e1b0.hsvc.ir:32371/1')
-REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+# REDIS_URL = os.getenv('REDIS_URL', 'redis://a382f1fb-2baa-466d-8d0e-ca4bfe39e1b0.hsvc.ir:32371/1')
+# REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': REDIS_URL,
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#             'PASSWORD': REDIS_PASSWORD,
+#         }
+#     }
+# }
 
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL,
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'django_cache',
         'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'PASSWORD': REDIS_PASSWORD,
+            'MAX_ENTRIES': 1000,
+            'TIMEOUT': 600,  # زمان انقضا برای OTP
         }
     }
 }
+
 # استفاده از Redis برای سشن‌ها
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_CACHE_ALIAS = 'default'

@@ -18,8 +18,6 @@ django-filter==24.3
 django-js-asset==2.2.0
 django-modelcluster==6.3
 django-permissionedforms==0.1
-django-ratelimit==4.1.0
-django-redis==5.4.0
 django-storages==1.14.4
 django-taggit==5.0.1
 django-treebeard==4.7.1
@@ -44,6 +42,7 @@ openpyxl==3.1.5
 packaging==24.1
 pillow==10.4.0
 pillow_heif==0.18.0
+pip-check-reqs==2.5.3
 psycopg2-binary==2.9.10
 pydantic==2.5.0
 pydantic_core==2.14.1
@@ -64,7 +63,6 @@ telepath==0.3.1
 typing_extensions==4.8.0
 uritemplate==4.1.1
 urllib3==2.1.0
-wagtail==6.2.2
 whitenoise==6.7.0
 Willow==1.8.0
 zarinpal==1.0.0
