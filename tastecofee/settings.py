@@ -138,6 +138,10 @@ CKEDITOR_IMAGE_BACKEND = "pillow"
 #         "PORT": os.getenv("DB_PORT"),
 #     }
 # }
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
 
 DATABASES = {
     'default': {
