@@ -280,6 +280,23 @@ STORAGES = {
     },
 }
 
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            'access_key': os.getenv("LIARA_ACCESS_KEY"),
+            'secret_key': os.getenv("LIARA_SECRET_KEY"),
+            'endpoint_url': os.getenv("LIARA_ENDPOINT"),
+            'bucket_name': os.getenv("LIARA_BUCKET_NAME"),
+            'file_overwrite': False,
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 BASE_URL = os.getenv('BASE_URL', 'https://tastecoffee.darkube.app/')
