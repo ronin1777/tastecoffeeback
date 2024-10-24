@@ -66,4 +66,3 @@ urllib3==2.1.0
 whitenoise==6.7.0
 Willow==1.8.0
 zarinpal==1.0.0
-
