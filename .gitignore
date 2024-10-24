@@ -8,8 +8,7 @@ build/
 
 # Django
 *.log
-*.sqlite3
-db.sqlite3
+
 
 .env
 *.pot
