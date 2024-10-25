@@ -31,7 +31,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')  # بارگذاری از فایل .env
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG') == 'True'  # تبدیل به بولین
 
-# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
