@@ -124,22 +124,22 @@ CKEDITOR_IMAGE_BACKEND = "pillow"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
-}
-
-
-
 # DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql_psycopg2",
-#         "NAME": os.getenv("DB_NAME"),
-#         "USER": os.getenv("DB_USER"),
-#         "PASSWORD": os.getenv("DB_PASSWORD"),
-#         "HOST": os.getenv("DB_HOST"),
-#         "PORT": os.getenv("DB_PORT"),
-#     }
+#     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 # }
+
+
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT"),
+    }
+}
 
 # DATABASES = {
 #     'default': {
@@ -308,12 +308,22 @@ ZARINPAL_MERCHANT_ID = os.getenv('ZARINPAL_MERCHANT_ID')
 ZARINPAL_STARTPAY_URL = os.getenv('ZARINPAL_STARTPAY_URL')
 ZARINPAL_VERIFY_URL = os.getenv('ZARINPAL_VERIFY_URL')
 
-# CSRF_TRUSTED_ORIGINS = [
-#     'https://tastecoffee.darkube.app',
-#     'http://localhost:8000',
-#     'https://tastecoffee.liara.run',
-# ]
+CSRF_TRUSTED_ORIGINS = [
+    'https://tastecoffee.darkube.app',
+    'http://localhost:8000',
+    'https://tastecoffee.liara.run',
+]
 
 
 
+
+
+# FROM hub.hamdocker.ir/library/python:3.11
+
+# WORKDIR /tastecofee/
+# ADD ./requirements.txt ./
+# RUN pip install --upgrade pip && pip install -r ./requirements.txt
+
+# ADD ./ ./
+# ENTRYPOINT ["/bin/sh", "-c" , "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 tastecofee.wsgi"]
 
