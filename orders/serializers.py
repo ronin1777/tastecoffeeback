@@ -31,10 +31,8 @@ class CartItemReadSerializer(serializers.ModelSerializer):
         return obj.product.name
 
     def get_product_image(self, obj):
-        image_url = obj.product.primary_image
-        if image_url:
-            return settings.BASE_URL + image_url  # Assuming BASE_URL is set in your settings
-        return None
+        return obj.product.primary_image
+
 
 
 class CartItemUpdateSerializer(serializers.ModelSerializer):
