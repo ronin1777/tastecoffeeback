@@ -124,9 +124,9 @@ CKEDITOR_IMAGE_BACKEND = "pillow"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
-# }
+DATABASES = {
+    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+}
 
 # DATABASES = {
 #     "default": {
@@ -138,14 +138,15 @@ CKEDITOR_IMAGE_BACKEND = "pillow"
 #         "PORT": os.getenv("DB_PORT"),
 #     }
 # }
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
 
 
-        'NAME': 'persistent_db/db.sqlite3',    
-        }
-}
+#         'NAME': 'persistent_db/db.sqlite3',    
+#         }
+# }
 
 
 

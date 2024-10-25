@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  web:
+    image: hub.hamdocker.ir/library/python:3.11 # استفاده از تصویر شما
+    build: . # از داکر فایلی که در این دایرکتوری است بساز
+    volumes:
+      - db_data:/tastecofee/persistent_db # Mounting the volume
+    ports:
+      - "8000:8000" # مپ کردن پورت‌ها
+
+volumes:
+  db_data: # ایجاد یک volume نام‌دار
