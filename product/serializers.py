@@ -56,3 +56,4 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             'created_at',
             'images',
         ]
+
