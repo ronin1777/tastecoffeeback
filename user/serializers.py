@@ -17,11 +17,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = ('name', 'email')
 
-    def validate_email(self, value):
+def validate_email(self, value):
+    if User.objects.filter(email=value).exists():
+        raise serializers.ValidationError("این ایمیل قبلاً استفاده شده است، لطفاً ایمیل دیگری وارد کنید.")
+    return value
 
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("این ایمیل قبلا استفاده شده, لطفا دوباره تلاش کنید")
-        return value
 
 
 class UserRetrieveSerializer(serializers.ModelSerializer):

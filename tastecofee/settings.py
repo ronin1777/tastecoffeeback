@@ -121,6 +121,7 @@ CKEDITOR_CONFIGS = {
 }
 CKEDITOR_UPLOAD_PATH = 'uploads/'
 CKEDITOR_IMAGE_BACKEND = "pillow"
+
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -256,13 +257,12 @@ SESSION_CACHE_ALIAS = 'default'
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fa-ir'
 
 TIME_ZONE = 'Asia/Tehran'
 
 USE_I18N = True
-
-USE_TZ = True
+USE_L10N = True
 
 
 # Static files (CSS, JavaScript, Images)

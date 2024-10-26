@@ -9,8 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
-from django.db.models import Q
-from django.db import IntegrityError, transaction 
+
 
 import redis
 # from django_ratelimit.decorators import ratelimit
@@ -154,12 +153,20 @@ class VerifyOtpView(generics.GenericAPIView):
 class CompleteRegistrationView(generics.GenericAPIView):
     serializer_class = UserRegistrationSerializer
 
-    @transaction.atomic  # استفاده از تراکنش اتمیک
     def patch(self, request, *args, **kwargs):
         phone_number = cache.get("current_phone_number")
         phone_number_str = phone_number if phone_number else None
-        name = request.data.get('name')
-        email = request.data.get('email')
+
+        # ایجاد یک نمونه از سریالایزر
+        serializer = self.get_serializer(data=request.data)
+
+        # اعتبارسنجی داده‌ها
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # دسترسی به داده‌های معتبر
+        name = serializer.validated_data.get('name')
+        email = serializer.validated_data.get('email')
 
         try:
             user = User.objects.get(phone_number=phone_number_str)
@@ -167,21 +174,10 @@ class CompleteRegistrationView(generics.GenericAPIView):
             if user.name and user.email:
                 return Response({"error": "شما قبلا ثبت نام کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
 
-            # چک کردن ایمیل تکراری
-            if User.objects.filter(Q(email=email) & ~Q(phone_number=phone_number_str)).exists():
-                return Response({"error": "این ایمیل قبلاً ثبت شده است"}, status=status.HTTP_400_BAD_REQUEST)
-
             # به روز رسانی اطلاعات کاربر
-            user.name = name if name else user.name
-            user.email = email if email else user.email
-
-            # استفاده از بلوک try-except برای هندل کردن IntegrityError
-            try:
-                user.save()
-            except IntegrityError:
-                # لغو کردن تراکنش در صورت بروز خطای IntegrityError
-                transaction.set_rollback(True)
-                return Response({"error": "این ایمیل قبلاً ثبت شده است"}, status=status.HTTP_400_BAD_REQUEST)
+            user.name = name
+            user.email = email
+            user.save()
 
             refresh = RefreshToken.for_user(user)
             cache.delete(f"otp_{phone_number_str}")
@@ -191,7 +187,8 @@ class CompleteRegistrationView(generics.GenericAPIView):
             }, status=status.HTTP_200_OK)
 
         except User.DoesNotExist:
-            return Response({"error": "کاربر یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
 
 # class VerifyOtpView(generics.GenericAPIView):
 #     serializer_class = OTPSerializer
