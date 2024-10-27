@@ -80,34 +80,34 @@ class OrderSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("کدپستی باید دقیقاً ۱۰ رقم باشد.")
         return value
 
-    def create(self, validated_data):
-        user = self.context['request'].user
-        cart_items = CartItem.objects.filter(cart__user=user)
+    # def create(self, validated_data):
+    #     user = self.context['request'].user
+    #     cart_items = CartItem.objects.filter(cart__user=user)
 
-        if not cart_items.exists():
-            raise serializers.ValidationError("سبد خرید خالی است.")
+    #     if not cart_items.exists():
+    #         raise serializers.ValidationError("سبد خرید خالی است.")
 
-        # ایجاد سفارش جدید
-        order = Order.objects.create(
-            user=user,
-            shipping_address=validated_data['shipping_address'],
-            postal_code=validated_data['postal_code'],  # ذخیره کد پستی
-            shipping_method=validated_data['shipping_method'],
-            total_price=sum(item.product.base_price * item.quantity for item in cart_items)
-        )
+    #     # ایجاد سفارش جدید
+    #     order = Order.objects.create(
+    #         user=user,
+    #         shipping_address=validated_data['shipping_address'],
+    #         postal_code=validated_data['postal_code'],  # ذخیره کد پستی
+    #         shipping_method=validated_data['shipping_method'],
+    #         total_price=sum(item.product.base_price * item.quantity for item in cart_items)
+    #     )
 
-        # ایجاد آیتم‌های سفارش
-        for item in cart_items:
-            OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity,
-                price=item.product.base_price
-            )
+    #     # ایجاد آیتم‌های سفارش
+    #     for item in cart_items:
+    #         OrderItem.objects.create(
+    #             order=order,
+    #             product=item.product,
+    #             quantity=item.quantity,
+    #             price=item.product.base_price
+    #         )
 
-        user.carts.last().delete()
+    #     user.carts.last().delete()
 
-        return order
+    #     return order
 
 
 class OrderUpdateSerializer(serializers.ModelSerializer):
@@ -163,6 +163,8 @@ class OrdersSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.name', read_only=True)
     authority = serializers.SerializerMethodField()
     ref_id = serializers.SerializerMethodField()
+    final_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+
 
     class Meta:
         model = Order

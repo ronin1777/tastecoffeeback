@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import serializers
 
-from .models import Cart, CartItem, Order, ShippingMethod
+from .models import Cart, CartItem, Order, ShippingMethod, OrderItem
 from .permissions import IsOwnerOfOrder
 from .serializers import (CartSerializer, CartItemUpdateSerializer, OrderSerializer, OrdersSerializer,
                           OrderUpdateSerializer, ShippingMethodSerializer)
@@ -289,10 +289,51 @@ class CartItemDeleteView(APIView):
 class OrderCreateView(generics.CreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [IsOwnerOfOrder]  # فقط کاربران لاگین کرده می‌توانند سفارش ثبت کنند
+    permission_classes = [IsOwnerOfOrder]
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)  # ذخیره کاربر به صورت خودکار
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        cart_items = CartItem.objects.filter(cart__user=user)
+
+        # 1. بررسی اینکه آیا سبد خرید خالی است یا خیر
+        if not cart_items.exists():
+            return Response({"error": "سبد خرید خالی است."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 2. استفاده از serializer برای اعتبارسنجی داده‌ها
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 3. ایجاد سفارش جدید
+        try:
+            order = Order.objects.create(
+                user=user,
+                shipping_address=serializer.validated_data['shipping_address'],
+                postal_code=serializer.validated_data['postal_code'],
+                shipping_method=serializer.validated_data['shipping_method'],
+                total_price=sum(item.product.base_price * item.quantity for item in cart_items)
+            )
+
+            # 4. ایجاد آیتم‌های سفارش
+            for item in cart_items:
+                OrderItem.objects.create(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                    price=item.product.base_price
+                )
+
+            # 5. حذف سبد خرید کاربر
+            user.carts.last().delete()
+
+            # 6. استفاده از serializer برای بازگرداندن اطلاعات کامل سفارش
+            order_data = OrderSerializer(order).data
+            return Response(order_data, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({"error": "خطا در ایجاد سفارش: " + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class OrderUpdateView(generics.UpdateAPIView):

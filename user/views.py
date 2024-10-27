@@ -275,6 +275,30 @@ class UserRetrieveView(generics.RetrieveAPIView):
             raise Http404("کاربر پیدا نشد.")
 
 
+# class UserProfileUpdateView(generics.UpdateAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UserUpdateSerializer
+#     permission_classes = [IsOwner]
+
+#     def get_object(self):
+#         return self.request.user
+
+#     def perform_update(self, serializer):
+#         if serializer.is_valid():
+#             serializer.save()
+#         else:
+#             print(serializer.errors)
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#     def patch(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(self.get_object(), data=request.data, partial=True)
+#         if serializer.is_valid():
+#             self.perform_update(serializer)
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         else:
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class UserProfileUpdateView(generics.UpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserUpdateSerializer
@@ -283,17 +307,28 @@ class UserProfileUpdateView(generics.UpdateAPIView):
     def get_object(self):
         return self.request.user
 
-    def perform_update(self, serializer):
-        if serializer.is_valid():
-            serializer.save()
-        else:
-            print(serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     def patch(self, request, *args, **kwargs):
-        serializer = self.get_serializer(self.get_object(), data=request.data, partial=True)
+        user = self.get_object()
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+
+
+        new_email = request.data.get('email', None)
+        if new_email and User.objects.filter(email=new_email).exclude(id=user.id).exists():
+            return Response(
+                {"error": "این ایمیل قبلاً استفاده شده است."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         if serializer.is_valid():
-            self.perform_update(serializer)
+
+            profile_picture = serializer.validated_data.pop('profile_picture', None)
+            if profile_picture:
+                user.profile_picture = profile_picture
+
+            for field, value in serializer.validated_data.items():
+                setattr(user, field, value)
+
+            user.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"error": "خطا در اطلاعات ورودی. لطفا دوباره بررسی کنید."}, status=status.HTTP_400_BAD_REQUEST)

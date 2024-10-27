@@ -38,10 +38,17 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'name', 'email', 'bio', 'location',
                   'birth_date', 'profile_picture', 'postal_code', 'phone_number')
+        
 
-    def update(self, instance, validated_data):
-        profile_picture = validated_data.pop('profile_picture', None)
-        if profile_picture:
-            instance.profile_picture = profile_picture
+    # def validate_email(self, value):
+    #     user = self.context['request'].user
+    #     if User.objects.filter(email=value).exclude(id=user.id).exists():
+    #         raise serializers.ValidationError("این ایمیل قبلاً استفاده شده است.")
+    #     return value
 
-        return super().update(instance, validated_data)
+    # def update(self, instance, validated_data):
+    #     profile_picture = validated_data.pop('profile_picture', None)
+    #     if profile_picture:
+    #         instance.profile_picture = profile_picture
+
+    #     return super().update(instance, validated_data)
