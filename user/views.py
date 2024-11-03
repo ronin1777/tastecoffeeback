@@ -12,8 +12,6 @@ from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 
 
 import redis
-# from django_ratelimit.decorators import ratelimit
-# from django_ratelimit.exceptions import Ratelimited
 
 from kavenegar import *
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -25,10 +23,12 @@ from .serializers import OTPSerializer, UserRegistrationSerializer, PhoneNumberS
     UserUpdateSerializer, UserRetrieveSerializer
 import logging
 
+from tastecofee.settings import KAVENEGAR_API_KEY
+from .utils import send_otp_code
 from orders.models import Cart
 
 logger = logging.getLogger(__name__)
-KAVENEGAR_API_KEY = '4C704D6A52324844577148424A3733377A704263503141436E5075455759332F6F704238694F2F78525A773D'
+KAVENEGAR_API_KEY = KAVENEGAR_API_KEY
 
 # redis_instance = redis.StrictRedis(host='a382f1fb-2baa-466d-8d0e-ca4bfe39e1b0.hsvc.ir', port=32371, db=1, password='JNXUmTdiGFZ5gUTlk2GSe8nGMvvtXLwF')
 
@@ -43,20 +43,20 @@ KAVENEGAR_API_KEY = '4C704D6A52324844577148424A3733377A704263503141436E507545575
 #         otp_code = randint(100000, 999999)
 #         otp = OTP.objects.create(phone_number=phone_number, otp_code=otp_code)
 #         # Send OTP via SMS service (e.g., Kavenegar)
-#         # try:
-#         #     api = KavenegarAPI(
-#         #         '4C704D6A52324844577148424A3733377A704263503141436E5075455759332F6F704238694F2F78525A773D')
-#         #     params = {
-#         #         'sender': '',  # optional
-#         #         'receptor': phone_number,  # multiple mobile number, split by comma
-#         #         'message': f"سلام به سایت tasetcoffee خوش امدید.\nرمز یک بار مصرف: {otp_code} ",
-#         #     }
-#         #     response = api.sms_send(params)
-#         #     print(response)
-#         # except APIException as e:
-#         #     print(e)
-#         # except HTTPException as e:
-#         #     print(e)
+        # try:
+        #     api = KavenegarAPI(
+        #         '4C704D6A52324844577148424A3733377A704263503141436E5075455759332F6F704238694F2F78525A773D')
+        #     params = {
+        #         'sender': '',  # optional
+        #         'receptor': phone_number,  # multiple mobile number, split by comma
+        #         'message': f"سلام به سایت tasetcoffee خوش امدید.\nرمز یک بار مصرف: {otp_code} ",
+        #     }
+        #     response = api.sms_send(params)
+        #     print(response)
+        # except APIException as e:
+        #     print(e)
+        # except HTTPException as e:
+        #     print(e)
 #
 #         return Response({"message": "OTP sent"}, status=status.HTTP_200_OK)
 
@@ -98,12 +98,13 @@ class SendOtpView(generics.GenericAPIView):
             return Response({"error": "Phone number is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         otp_code = randint(1000, 9999)
+        send_otp_code(phonenumber=phone_number, otp=otp_code)
 
         # ذخیره OTP در کش
         cache.set(f"otp_{phone_number}", otp_code, timeout=600)
         cache.set("current_phone_number", phone_number, timeout=600)
 
-        print(f"Stored OTP for {phone_number}: {otp_code}")  # برای دیباگ
+        print(f"Stored OTP for {phone_number}: {otp_code}") 
 
         return Response({"message": f"OTP {otp_code} sent to {phone_number}"}, status=status.HTTP_200_OK)
 
@@ -189,74 +190,6 @@ class CompleteRegistrationView(generics.GenericAPIView):
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-
-# class VerifyOtpView(generics.GenericAPIView):
-#     serializer_class = OTPSerializer
-
-#     def post(self, request, *args, **kwargs):
-#         global user_cart_data
-#         entered_otp = request.data.get('otp')
-#         phone_number = redis_instance.get("current_phone_number")
-#         phone_number_str = phone_number.decode() if phone_number else None
-#         saved_otp = redis_instance.get(f"otp_{phone_number_str}")
-
-#         if str(entered_otp) != str(saved_otp.decode('utf-8')):
-#             return Response({"error": "invalid"}, status=status.HTTP_400_BAD_REQUEST)
-
-#         user, created = User.objects.get_or_create(phone_number=phone_number_str)
-
-#         if created:
-#             return Response({"message": "register"}, status=status.HTTP_201_CREATED)
-
-#         if user:
-
-#             if not user.name or not user.email:
-#                 return Response({"message": "کاربر جدید، لطفاً ثبت‌نام را تکمیل کنید"}, status=status.HTTP_202_ACCEPTED)
-#             else:
-
-#                 refresh = RefreshToken.for_user(user)
-#                 redis_instance.delete(f"otp_{phone_number_str}")
-#                 user_cart = Cart.objects.filter(user=user).first()
-#                 cart_exists = False
-#                 if user_cart:
-#                     cart_exists = True
-
-#                 return Response({
-#                     "access_token": str(refresh.access_token),
-#                     "refresh_token": str(refresh),
-#                     "cartExists": cart_exists,
-#                 }, status=status.HTTP_200_OK)
-
-
-# class CompleteRegistrationView(generics.GenericAPIView):
-#     serializer_class = UserRegistrationSerializer
-
-#     def patch(self, request, *args, **kwargs):
-#         phone_number = redis_instance.get("current_phone_number")
-#         phone_number_str = phone_number.decode() if phone_number else None
-#         name = request.data.get('name')
-#         email = request.data.get('email')
-
-#         try:
-#             user = User.objects.get(phone_number=phone_number_str)
-
-#             if user.name and user.email:
-#                 return Response({"error": "شما قبلا ثبت نام کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
-
-#             # به روز رسانی اطلاعات کاربر
-#             user.name = name if name else user.name
-#             user.email = email if email else user.email
-#             user.save()
-
-#             refresh = RefreshToken.for_user(user)
-#             redis_instance.delete(f"otp_{phone_number_str}")
-#             return Response({
-#                 "access_token": str(refresh.access_token),
-#                 "refresh_token": str(refresh)
-#             }, status=status.HTTP_200_OK)
-
-#         except User.DoesNotExist:
-#             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class UserRetrieveView(generics.RetrieveAPIView):

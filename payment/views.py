@@ -15,12 +15,12 @@ from rest_framework_simplejwt.tokens import AccessToken
 from orders.models import Order
 from payment.models import Payment
 from payment.zarinnpal import Zarinpal
-from tastecofee.settings import CALLBACK_URL, FRONT_URL, ZARINPAL_MERCHANT_ID
-
+from tastecofee.settings import CALLBACK_URL, FRONT_URL, ZARINPAL_MERCHANT_ID, ADMIN_PHONE_NUMBER
+from user.utils import send_sms_to_admin
 
 logger = logging.getLogger(__name__)
 
-MERCHANT_ID = "123456789012345678901234567890123456"
+
 
 
 class ZarinpalPaymentRequestView(APIView):
@@ -30,9 +30,9 @@ class ZarinpalPaymentRequestView(APIView):
 
         amount = int(order.final_price)
         description = f"پرداخت آزمایشی برای سفارش {order_id}"[:500]
-        callback_url = "{CALLBACK_URL}/api/payment/callback-verify/"
+        callback_url = f"{CALLBACK_URL}/api/payment/callback-verify/"
 
-        zarinpal = Zarinpal(merchant_id=f'{MERCHANT_ID}', debug=True)
+        zarinpal = Zarinpal(merchant_id=f'{ZARINPAL_MERCHANT_ID}', debug=True)
 
         try:
 
@@ -58,61 +58,6 @@ class ZarinpalPaymentRequestView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# class ZarinpalCallbackView(APIView):
-#     permission_classes = [AllowAny]
-#
-#     def get(self, request):
-#         authority = request.GET.get('Authority')
-#         status_param = request.GET.get('Status')
-#
-#         if not authority or not status_param:
-#             return Response({"error": "Authority یا Status وجود ندارد."}, status=status.HTTP_400_BAD_REQUEST)
-#
-#         payment = Payment.objects.filter(authority=authority).first()
-#
-#         if not payment:
-#             return Response({"error": "پرداختی با این Authority پیدا نشد."}, status=status.HTTP_404_NOT_FOUND)
-#
-#         amount = payment.amount
-#         zarinpal = Zarinpal(merchant_id='123456789012345678901234567890123456', debug=True)
-#
-#         if status_param == "OK":
-#             try:
-#                 verification_result = zarinpal.verify_payment(authority=authority, amount=amount)
-#
-#                 if verification_result['status']:
-#
-#                     payment.ref_id = verification_result.get('ref_id', None)
-#                     payment.status = 'successful'
-#                     payment.save()
-#
-#                     order = payment.order
-#                     order.complete_order()
-#
-#                     return redirect(f"http://127.0.0.1:3000/payment/success?ref_id={verification_result.get('ref_id', '')}&amount={amount}&status=successful")
-#                 else:
-#                     payment.status = 'failed'
-#                     payment.save()
-#
-#                     order = payment.order
-#                     order.status = 'canceled'
-#                     order.save()
-#
-#                     return redirect(f"http://127.0.0.1:3000/payment/failure?error={verification_result['errors']}&status=failed")
-#
-#             except Exception as e:
-#                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-#         else:
-#             payment.status = 'failed'
-#             payment.save()
-#
-#             order = payment.order
-#             order.status = 'canceled'
-#             order.save()
-#
-#             return redirect("http://127.0.0.1:3000/payment/failure?error=Payment%20failed&status=failed")
-
-
 class ZarinpalCallbackView(APIView):
     def get(self, request):
         authority = request.GET.get('Authority')
@@ -127,16 +72,16 @@ class ZarinpalCallbackView(APIView):
             return Response({"error": "پرداختی با این Authority پیدا نشد."}, status=status.HTTP_404_NOT_FOUND)
 
         amount = payment.amount
-        zarinpal = Zarinpal(merchant_id=f'{MERCHANT_ID}', debug=True)
+        zarinpal = Zarinpal(merchant_id=f'{ZARINPAL_MERCHANT_ID}', debug=True)
 
-        # دسترسی به کاربر از طریق order
+
         user = payment.order.user
 
-        # ایجاد توکن برای کاربر
-        access_token = AccessToken.for_user(user)
-        refresh_token = RefreshToken.for_user(user)  # ایجاد توکن تازه
 
-        # وضعیت پرداخت را بررسی می‌کنیم
+        access_token = AccessToken.for_user(user)
+        refresh_token = RefreshToken.for_user(user)
+
+
         if status_param == "OK":
             try:
                 verification_result = zarinpal.verify_payment(authority=authority, amount=amount)
@@ -148,27 +93,19 @@ class ZarinpalCallbackView(APIView):
 
                     order = payment.order
                     order.complete_order()
-
+                    send_sms_to_admin(admin_phone=ADMIN_PHONE_NUMBER, user_phone=user.phone_number, user_name=user.name)
                     response = JsonResponse({"success": True})
 
-                    # ست کردن کوکی‌ها
-                    # response.set_cookie(key='access_token', value=str(access_token), httponly=False, max_age=60 * 60, path='/')
-                    # response.set_cookie(key='refresh_token', value=str(refresh_token), httponly=False, max_age=60 * 60 * 24 * 30, path='/')  # ست کردن رفرش توکن
 
-                    # هدایت به صفحه موفقیت پرداخت در Next.js با اطلاعات پرداخت
                     response['Location'] = f"{FRONT_URL}/payment/success?ref_id={verification_result.get('ref_id', '')}&amount={amount}&status=successful"
                     response.status_code = 302
                     return response
 
                 else:
-                    # Handle failure
                     payment.status = 'failed'
                     payment.save()
 
-                    # ست کردن کوکی‌ها حتی در حالت ناموفق
                     response = JsonResponse({"success": False})
-                    # response.set_cookie(key='access_token', value=str(access_token), httponly=False, max_age=60 * 60, path='/')
-                    # response.set_cookie(key='refresh_token', value=str(refresh_token), httponly=False, max_age=60 * 60 * 24 * 30, path='/')  # ست کردن رفرش توکن
 
                     return redirect(f"{FRONT_URL}/payment/failure?error=Payment%20failed&status=failed")
 
@@ -176,14 +113,12 @@ class ZarinpalCallbackView(APIView):
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         else:
-            # Handle cancelled payment
+
             payment.status = 'failed'
             payment.save()
 
-            # ست کردن کوکی‌ها حتی در حالت ناموفق
+
             response = JsonResponse({"success": False})
-            # response.set_cookie(key='access_token', value=str(access_token), httponly=False, max_age=60 * 60, path='/')
-            # response.set_cookie(key='refresh_token', value=str(refresh_token), httponly=False, max_age=60 * 60 * 24 * 30, path='/')  # ست کردن رفرش توکن
 
             return redirect(f"{FRONT_URL}/payment/failure?error=Payment%20failed&status=failed")
 
