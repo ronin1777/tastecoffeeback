@@ -125,117 +125,6 @@ class CartDetailView(APIView):
             return Response({'message': 'شناسه سبد خرید ارسال نشده است.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# class AssignCartToUserView(APIView):
-#     def post(self, request):
-#         # چک کردن ورود کاربر
-#         if not request.user.is_authenticated:
-#             return Response({'error': 'User must be authenticated.'}, status=status.HTTP_401_UNAUTHORIZED)
-#
-#         # استفاده از سریالایزر برای ولیدیشن داده‌های ورودی
-#         serializer = AssignCartToUserSerializer(data=request.data)
-#         if not serializer.is_valid():
-#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#         cart_id = serializer.validated_data['cart_uuid']
-#         print(f'cart_id: {cart_id}')
-#
-#         try:
-#             # پیدا کردن سبد خرید مهمان
-#             guest_cart = Cart.objects.get(id=cart_id, user__isnull=True)
-#             print(f'guest cart: {guest_cart}')
-#             existing_cart = Cart.objects.filter(user=request.user).first()
-#             print(f'existing cart: {existing_cart}')
-#             if existing_cart:
-#                 # اگر کاربر سبد خرید دارد و سبد خرید مهمان وجود ندارد
-#                 if not guest_cart:
-#                     return Response({'message': 'User already has a cart.'}, status=status.HTTP_409_CONFLICT)
-#                 # اگر کاربر سبد خرید دارد و سبد خرید مهمان هم وجود دارد
-#                 guest_cart.delete()
-#                 return Response({'message': 'Guest cart deleted.'}, status=status.HTTP_200_OK)
-#
-#             # اگر کاربر سبد خرید ندارد و سبد خرید مهمان وجود دارد
-#             guest_cart.user = request.user
-#             guest_cart.save()
-#             return Response({'message': 'Guest cart assigned to user.'}, status=status.HTTP_200_OK)
-#
-#         except Cart.DoesNotExist:
-#             return Response({'error': 'Cart not found or already assigned to another user.'}, status=status.HTTP_404_NOT_FOUND)
-#         except Exception as e:
-#             # مدیریت خطاهای عمومی‌تر
-#             return Response({'error': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-# class CartCreateView(generics.CreateAPIView):
-#     serializer_class = CartSerializer
-#
-#     def perform_create(self, serializer):
-#         user = self.request.user if self.request.user.is_authenticated else None
-#
-#         # اگر کاربر مهمان باشد، سبد خرید موقتی ایجاد می‌شود
-#         if not user:
-#             cart = serializer.save(id=uuid.uuid4())
-#         else:
-#             serializer.save(id=uuid.uuid4(), user=user)
-
-
-# class CartItemCreateView(generics.CreateAPIView):
-#     serializer_class = CartItemSerializer
-#
-#     def perform_create(self, serializer):
-#         user = self.request.user if self.request.user.is_authenticated else None
-#         cart_id = self.request.data.get('cart')
-#
-#         if user:  # اگر کاربر وارد شده باشد
-#             print(f"User is authenticated: {user}")
-#             # بررسی کنید آیا کاربر یک سبد خرید دارد یا نه
-#             user_cart = Cart.objects.filter(user=user).first()
-#
-#             if user_cart:  # اگر سبد خرید برای کاربر موجود باشد
-#                 cart = user_cart
-#             else:  # اگر سبد خرید برای کاربر موجود نباشد
-#                 # از سبد خرید ناشناس استفاده کنید و آن را به کاربر اختصاص دهید
-#                 anonymous_cart = Cart.objects.filter(id=cart_id).first()
-#                 if anonymous_cart:
-#                     anonymous_cart.user = user
-#                     anonymous_cart.save()
-#                     cart = anonymous_cart
-#                 else:
-#                     cart = Cart.objects.create(user=user)  # ایجاد یک سبد خرید جدید برای کاربر
-#
-#         else:  # اگر کاربر وارد نشده باشد
-#             # استفاده از سبد خرید ناشناس
-#             cart = generics.get_object_or_404(Cart, id=cart_id)
-#
-#         product_id = self.request.data.get('product')
-#         quantity = int(self.request.data.get('quantity', 1))
-#         product = generics.get_object_or_404(Product, id=product_id)
-#
-#         cart_item, created = CartItem.objects.get_or_create(
-#             cart=cart,
-#             product=product,
-#             defaults={'quantity': quantity}
-#         )
-#
-#         if not created:
-#             cart_item.quantity += quantity
-#             cart_item.save()
-#
-#         response_serializer = CartItemReadSerializer(cart_item)
-#         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-
-
-# class CartDetailView(generics.RetrieveAPIView):
-#     serializer_class = CartSerializer
-#
-#     def get_object(self):
-#         user = self.request.user if self.request.user.is_authenticated else None
-#         cart_id = self.kwargs.get('pk')
-#
-#         if user:  # If the user is authenticated, fetch their cart
-#             return generics.get_object_or_404(Cart, user=user)
-#         else:  # Otherwise, get the cart by its ID from the URL
-#             return generics.get_object_or_404(Cart, id=cart_id)
-#
-
 
 class CartItemUpdateView(generics.UpdateAPIView):
     serializer_class = CartItemUpdateSerializer
@@ -330,6 +219,7 @@ class OrderCreateView(generics.CreateAPIView):
 
             # 6. استفاده از serializer برای بازگرداندن اطلاعات کامل سفارش
             order_data = OrderSerializer(order).data
+
             return Response(order_data, status=status.HTTP_201_CREATED)
 
         except Exception as e:

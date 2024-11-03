@@ -30,7 +30,7 @@ class UserAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        # می‌توانید درخواست‌های خاصی را در اینجا مدیریت کنید
         return queryset
 
 admin.site.register(User, UserAdmin)
+

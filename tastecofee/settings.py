@@ -210,6 +210,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:1",
     "https://tastecoffee.liara.run", 
     "https://tastecoffeefront.vercel.app",
+    "https://tastecoffeefront.darkube.app",
+    'https://taste-coffee.ir'
+    'https://www.taste-coffee.ir'
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
@@ -298,7 +301,7 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-BASE_URL = os.getenv('BASE_URL', 'https://tastecoffee.darkube.app/')
+BASE_URL = os.getenv('BASE_URL', 'https://tastecoffee.darkube.app')
 
 
 ZARINPAL_MERCHANT_ID = os.getenv('ZARINPAL_MERCHANT_ID')
@@ -309,18 +312,9 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tastecoffee.darkube.app',
     'http://localhost:8000',
     'https://tastecoffee.liara.run',
+
 ]
 
 
-
-
-
-# FROM hub.hamdocker.ir/library/python:3.11
-
-# WORKDIR /tastecofee/
-# ADD ./requirements.txt ./
-# RUN pip install --upgrade pip && pip install -r ./requirements.txt
-
-# ADD ./ ./
-# ENTRYPOINT ["/bin/sh", "-c" , "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 tastecofee.wsgi"]
-
+CALLBACK_URL=os.getenv('CALLBACK_URL')
+FRONT_URL=os.getenv('FRONT_URL')

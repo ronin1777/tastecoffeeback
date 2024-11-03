@@ -15,6 +15,8 @@ from rest_framework_simplejwt.tokens import AccessToken
 from orders.models import Order
 from payment.models import Payment
 from payment.zarinnpal import Zarinpal
+from tastecofee.settings import CALLBACK_URL, FRONT_URL, ZARINPAL_MERCHANT_ID
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +30,9 @@ class ZarinpalPaymentRequestView(APIView):
 
         amount = int(order.final_price)
         description = f"پرداخت آزمایشی برای سفارش {order_id}"[:500]
-        callback_url = "http://127.0.0.1:8000/api/payment/callback-verify/"
+        callback_url = "{CALLBACK_URL}/api/payment/callback-verify/"
 
-        zarinpal = Zarinpal(merchant_id='123456789012345678901234567890123456', debug=True)
+        zarinpal = Zarinpal(merchant_id=f'{MERCHANT_ID}', debug=True)
 
         try:
 
@@ -125,7 +127,7 @@ class ZarinpalCallbackView(APIView):
             return Response({"error": "پرداختی با این Authority پیدا نشد."}, status=status.HTTP_404_NOT_FOUND)
 
         amount = payment.amount
-        zarinpal = Zarinpal(merchant_id='123456789012345678901234567890123456', debug=True)
+        zarinpal = Zarinpal(merchant_id=f'{MERCHANT_ID}', debug=True)
 
         # دسترسی به کاربر از طریق order
         user = payment.order.user
@@ -154,7 +156,7 @@ class ZarinpalCallbackView(APIView):
                     # response.set_cookie(key='refresh_token', value=str(refresh_token), httponly=False, max_age=60 * 60 * 24 * 30, path='/')  # ست کردن رفرش توکن
 
                     # هدایت به صفحه موفقیت پرداخت در Next.js با اطلاعات پرداخت
-                    response['Location'] = f"http://localhost:3000/payment/success?ref_id={verification_result.get('ref_id', '')}&amount={amount}&status=successful"
+                    response['Location'] = f"{FRONT_URL}/payment/success?ref_id={verification_result.get('ref_id', '')}&amount={amount}&status=successful"
                     response.status_code = 302
                     return response
 
@@ -168,7 +170,7 @@ class ZarinpalCallbackView(APIView):
                     # response.set_cookie(key='access_token', value=str(access_token), httponly=False, max_age=60 * 60, path='/')
                     # response.set_cookie(key='refresh_token', value=str(refresh_token), httponly=False, max_age=60 * 60 * 24 * 30, path='/')  # ست کردن رفرش توکن
 
-                    return redirect(f"http://localhost:3000/payment/failure?error=Payment%20failed&status=failed")
+                    return redirect(f"{FRONT_URL}/payment/failure?error=Payment%20failed&status=failed")
 
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -183,7 +185,7 @@ class ZarinpalCallbackView(APIView):
             # response.set_cookie(key='access_token', value=str(access_token), httponly=False, max_age=60 * 60, path='/')
             # response.set_cookie(key='refresh_token', value=str(refresh_token), httponly=False, max_age=60 * 60 * 24 * 30, path='/')  # ست کردن رفرش توکن
 
-            return redirect("http://localhost:3000/payment/failure?error=Payment%20failed&status=failed")
+            return redirect(f"{FRONT_URL}/payment/failure?error=Payment%20failed&status=failed")
 
 
 # class ZarinpalPaymentRequestView(APIView):
