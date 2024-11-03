@@ -211,7 +211,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://tastecoffee.liara.run", 
     "https://tastecoffeefront.vercel.app",
     "https://tastecoffeefront.darkube.app",
-    'https://taste-coffee.ir'
+    'https://taste-coffee.ir',
     'https://www.taste-coffee.ir'
 ]
 CORS_ALLOW_CREDENTIALS = True
