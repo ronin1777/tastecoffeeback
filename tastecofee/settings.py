@@ -312,6 +312,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tastecoffee.darkube.app',
     'http://localhost:8000',
     'https://tastecoffee.liara.run',
+    'https://api.taste-coffee.ir'
 
 ]
 
