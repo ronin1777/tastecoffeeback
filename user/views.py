@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
-
+import requests
 
 import redis
 
@@ -23,12 +23,15 @@ from .serializers import OTPSerializer, UserRegistrationSerializer, PhoneNumberS
     UserUpdateSerializer, UserRetrieveSerializer
 import logging
 
-from tastecofee.settings import KAVENEGAR_API_KEY
-from .utils import send_otp_code
+
+from .utils import melipayamak_send_sms
 from orders.models import Cart
 
+
+
+
 logger = logging.getLogger(__name__)
-KAVENEGAR_API_KEY = KAVENEGAR_API_KEY
+
 
 # redis_instance = redis.StrictRedis(host='a382f1fb-2baa-466d-8d0e-ca4bfe39e1b0.hsvc.ir', port=32371, db=1, password='JNXUmTdiGFZ5gUTlk2GSe8nGMvvtXLwF')
 
@@ -87,6 +90,8 @@ KAVENEGAR_API_KEY = KAVENEGAR_API_KEY
     #         return JsonResponse({"error": "شما نمی‌توانید بیشتر از یک بار در دقیقه درخواست ارسال کنید."}, status=403)
     #     return super().handle_exception(exc)
 
+
+
 class SendOtpView(generics.GenericAPIView):
     serializer_class = PhoneNumberSerializer
     throttle_classes = [AnonRateThrottle] 
@@ -97,22 +102,27 @@ class SendOtpView(generics.GenericAPIView):
         if not phone_number:
             return Response({"error": "Phone number is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        otp_code = randint(1000, 9999)
-        send_otp_code(phonenumber=phone_number, otp=otp_code)
+        otp_code = randint(10000, 99999)
 
-        # ذخیره OTP در کش
+
         cache.set(f"otp_{phone_number}", otp_code, timeout=600)
         cache.set("current_phone_number", phone_number, timeout=600)
 
-        print(f"Stored OTP for {phone_number}: {otp_code}") 
 
-        return Response({"message": f"OTP {otp_code} sent to {phone_number}"}, status=status.HTTP_200_OK)
+        sms_response = melipayamak_send_sms(phone_number, otp_code)
+        
+        if "error" in sms_response:
+            return Response({"error": "Failed to send OTP", "details": sms_response["error"]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+        return Response({"message": f"OTP sent to {phone_number}"}, status=status.HTTP_200_OK)
 
     def handle_exception(self, exc):
         # بررسی خطای نرخ محدودسازی
         if isinstance(exc, Exception) and "throttled" in str(exc):
             return Response({"error": "شما نمی‌توانید بیشتر از 10 بار در دقیقه درخواست ارسال کنید."}, status=429)
         return super().handle_exception(exc)
+
 
 
 

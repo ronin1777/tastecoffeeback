@@ -13,7 +13,7 @@ from .serializers import (CartSerializer, CartItemUpdateSerializer, OrderSeriali
 import uuid
 
 from product.models import Product
-
+from user.utils import send_order_notification
 
 class CartItemCreateView(APIView):
     def post(self, request):
@@ -190,6 +190,11 @@ class OrderCreateView(generics.CreateAPIView):
 
         # 2. استفاده از serializer برای اعتبارسنجی داده‌ها
         serializer = self.get_serializer(data=request.data)
+
+        order_id = request.data.get('id')
+        if order_id and Order.objects.filter(id=order_id).exists():
+            return Response({"error": "سفارش شما قبلاً ثبت شده است."}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             serializer.is_valid(raise_exception=True)
         except Exception as e:
@@ -216,10 +221,12 @@ class OrderCreateView(generics.CreateAPIView):
 
             # 5. حذف سبد خرید کاربر
             user.carts.last().delete()
-
+            
             # 6. استفاده از serializer برای بازگرداندن اطلاعات کامل سفارش
             order_data = OrderSerializer(order).data
+            send_order_notification(order.user.name, order.user.phone_number, order.id)
 
+            print(f'کاربر {order.user.name} با شماره تلفن{order.user.phone_number} یک سفارش با ایدی {order.id} ثبت کرد.')
             return Response(order_data, status=status.HTTP_201_CREATED)
 
         except Exception as e:

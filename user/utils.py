@@ -1,6 +1,7 @@
 from kavenegar import *
-from tastecofee.settings import KAVENEGAR_API_KEY
+from tastecofee.settings import KAVENEGAR_API_KEY, MELIPAYAMAK_API
 
+import requests
 def send_otp_code(phonenumber, otp):
     try:
         api = KavenegarAPI(KAVENEGAR_API_KEY)
@@ -32,3 +33,113 @@ def send_sms_to_admin(admin_phone, user_phone, user_name):
             print(e)
     except HTTPException as e:
             print(e)
+
+
+
+# def melipayamak_send_sms(to, text, from_number=None):
+
+#     username = MELIPAYAMAK_USERNAME
+#     password = MELIPAYAMAK_PASSWORD
+#     api = Api(username, password)
+#     sms = api.sms()
+#     from_number = MELIPAYAMAK_SEND_NUMBER
+#     response = sms.send(to, from_number, text)
+#     print(f"SMS Response: {response}")
+#     return response
+
+
+
+
+# def melipayamak_send_sms(to, text):
+#     """
+#     ارسال پیامک با استفاده از API ملی پیامک
+#     :param to: شماره گیرنده (به فرمت '09xxxxxxxxx')
+#     :param text: متن پیامک
+#     :return: نتیجه ارسال پیامک به صورت دیکشنری
+#     """
+#     url = 'https://console.melipayamak.com/api/send/simple/10b62aa0c79249bf9e4b2f2407679bb1'
+    
+#     data = {
+#         'from': MELIPAYAMAK_SEND_NUMBER,
+#         'to': to,
+#         'text': text
+#     }
+    
+#     try:
+#         response = requests.post(url, json=data)
+#         print(response)
+#         response.raise_for_status()
+#         return response.json() 
+#     except requests.exceptions.RequestException as e:
+#         print(f"Error sending SMS: {e}")
+#         return {"status": "failed", "error": str(e)}
+
+
+def melipayamak_send_sms(phone_number, otp_code):
+    """
+    Sends an OTP SMS to the specified phone number using Melipayamak's shared service.
+    
+    Args:
+        phone_number (str): The recipient's phone number.
+        otp_code (int): The OTP code to be sent.
+        
+    Returns:
+        dict: The response from the API, including recId and status.
+    """
+    # اطلاعات مورد نیاز برای ارسال پیامک
+    url = MELIPAYAMAK_API
+    data = {
+        "bodyId": 265084,  # bodyId الگوی تأییدشده شما در ملی پیامک
+        "to": phone_number,
+        "args": [str(otp_code)]  # ارسال کد تایید به عنوان متغیر اول در آرایه
+    }
+    
+    try:
+        response = requests.post(url, json=data)
+        response_data = response.json()
+        print(response)
+        print(MELIPAYAMAK_API)
+        
+        # بررسی وضعیت ارسال و نمایش پیام در صورت نیاز
+        if response.status_code == 200:
+            return response_data
+        else:
+            return {"error": "Failed to send SMS", "details": response_data}
+    
+    except requests.exceptions.RequestException as e:
+        return {"error": "An error occurred while sending the SMS", "details": str(e)}
+    
+
+def send_order_notification(user_name, user_phone, order_id):
+    """
+    Sends an OTP SMS to the specified phone number using Melipayamak's shared service.
+    
+    Args:
+        phone_number (str): The recipient's phone number.
+        otp_code (int): The OTP code to be sent.
+        
+    Returns:
+        dict: The response from the API, including recId and status.
+    """
+    # اطلاعات مورد نیاز برای ارسال پیامک
+    url = MELIPAYAMAK_API
+    data = {
+        "bodyId": 265332,  # bodyId الگوی تأییدشده شما در ملی پیامک
+        "to": '09156599198',
+        "args": [user_name, user_phone, order_id]
+    }
+    
+    try:
+        response = requests.post(url, json=data)
+        response_data = response.json()
+        print(response)
+        print(MELIPAYAMAK_API)
+        
+        # بررسی وضعیت ارسال و نمایش پیام در صورت نیاز
+        if response.status_code == 200:
+            return response_data
+        else:
+            return {"error": "Failed to send SMS", "details": response_data}
+    
+    except requests.exceptions.RequestException as e:
+        return {"error": "An error occurred while sending the SMS", "details": str(e)}
