@@ -109,11 +109,11 @@ class SendOtpView(generics.GenericAPIView):
         cache.set("current_phone_number", phone_number, timeout=600)
 
 
-        sms_response = melipayamak_send_sms(phone_number, otp_code)
+        # sms_response = melipayamak_send_sms(phone_number, otp_code)
         
-        if "error" in sms_response:
-            return Response({"error": "Failed to send OTP", "details": sms_response["error"]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+        # if "error" in sms_response:
+        #     return Response({"error": "Failed to send OTP", "details": sms_response["error"]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        print(otp_code)
 
         return Response({"message": f"OTP sent to {phone_number}"}, status=status.HTTP_200_OK)
 
