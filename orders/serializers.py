@@ -19,19 +19,30 @@ class CartItemReadSerializer(serializers.ModelSerializer):
     total_price_items = serializers.SerializerMethodField()
     product_name = serializers.SerializerMethodField()
     product_image = serializers.SerializerMethodField()
+    weight = serializers.SerializerMethodField()
 
     class Meta:
         model = CartItem
-        fields = ['id', 'product', 'product_name', 'product_image', 'quantity', 'total_price_items']
+        fields = ['id', 'product', 'product_name', 'product_image', 'quantity', 'total_price_items', 'weight']
 
     def get_total_price_items(self, obj):
-        return obj.product.base_price * obj.quantity
+        # دریافت قیمت از وزن انتخابی محصول
+        product_weight = obj.product.weights.first()  # فرض می‌کنیم اولین وزن انتخاب‌شده برای محصول است
+        if product_weight:
+            return product_weight.price * obj.quantity
+        return 0  # اگر وزن پیدا نشد، قیمت صفر برمی‌گردانیم
 
     def get_product_name(self, obj):
         return obj.product.name
 
     def get_product_image(self, obj):
         return obj.product.primary_image
+    
+    def get_weight(self, obj):
+        product_weight = obj.product.weights.first()  # استفاده از related_name "weights"
+        if product_weight:
+            return product_weight.weight
+        return None  # اگر وزن پیدا نشد، مقدار None برمی‌گردانیم
 
 
 
@@ -50,8 +61,13 @@ class CartSerializer(serializers.ModelSerializer):
         fields = ['id', 'created_at', 'total_price_cart', 'items']
 
     def get_total_price_cart(self, obj):
-        return sum(item.product.base_price * item.quantity for item in obj.items.all())
-
+        total_price = 0
+        for item in obj.items.all():
+            # دریافت قیمت از وزن انتخاب‌شده برای محصول
+            product_weight = item.product.weights.first()  # فرض می‌کنیم اولین وزن انتخاب‌شده برای محصول است
+            if product_weight:
+                total_price += product_weight.price * item.quantity
+        return total_price
 
 class OrderSerializer(serializers.ModelSerializer):
     final_price = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)

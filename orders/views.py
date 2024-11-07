@@ -12,15 +12,18 @@ from .serializers import (CartSerializer, CartItemUpdateSerializer, OrderSeriali
                           OrderUpdateSerializer, ShippingMethodSerializer)
 import uuid
 
-from product.models import Product
+
+from product.models import Product, ProductWeight
 from user.utils import send_order_notification
 
 class CartItemCreateView(APIView):
     def post(self, request):
         user = request.user if request.user.is_authenticated else None
         product_id = request.data.get('product_id')
+        weight_id = request.data.get('weight_id')
         quantity = int(request.data.get('quantity', 1))
         product = get_object_or_404(Product, id=product_id)
+        weight = get_object_or_404(ProductWeight, id=weight_id)
 
         # دریافت UUID از فرانت‌اند برای کاربر مهمان
         cart_uuid = request.data.get('cart_uuid')
@@ -226,7 +229,6 @@ class OrderCreateView(generics.CreateAPIView):
             order_data = OrderSerializer(order).data
             send_order_notification(order.user.name, order.user.phone_number, order.id)
 
-            print(f'کاربر {order.user.name} با شماره تلفن{order.user.phone_number} یک سفارش با ایدی {order.id} ثبت کرد.')
             return Response(order_data, status=status.HTTP_201_CREATED)
 
         except Exception as e:

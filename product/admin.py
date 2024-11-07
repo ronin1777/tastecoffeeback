@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage
+from .models import Category, Product, ProductImage, ProductWeight
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
@@ -7,11 +7,23 @@ class ProductImageInline(admin.TabularInline):
     fields = ('image', 'image_type')  # فیلدهایی که نمایش داده می‌شوند
     max_num = 3  # حداکثر تعداد عکس‌ها
 
+
+class ProductWeightInline(admin.TabularInline):
+    model = ProductWeight
+    extra = 1  # تعداد رکوردهای اضافی برای وارد کردن وزن
+    fields = ('weight', 'price')  # فیلدهایی که نمایش داده می‌شوند
+    max_num = 5  # حداکثر تعداد وزن‌ها (می‌توانید این مقدار را تغییر دهید)
+    
+    def get_queryset(self, request):
+        # برای اطمینان از اینکه فقط وزن‌های مربوط به این محصول نمایش داده شوند
+        return super().get_queryset(request)
+    
+
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'coffee_type', 'weight', 'base_price', 'stock', 'available')
-    search_fields = ('name', 'description', 'coffee_type', 'weight')
-    list_filter = ('coffee_type', 'weight', 'category')
-    inlines = [ProductImageInline]
+    list_display = ('name', 'coffee_type','stock', 'available')
+    search_fields = ('name', 'description', 'coffee_type')
+    list_filter = ('coffee_type', 'category')
+    inlines = [ProductImageInline, ProductWeightInline]  # اضافه کردن Inline برای وزن‌ها
     
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)

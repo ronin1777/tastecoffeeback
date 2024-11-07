@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Product, Category, ProductImage
+from .models import Product, Category, ProductImage, ProductWeight
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -8,6 +8,10 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'name', 'slug']
 
+class ProductWeightSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductWeight
+        fields = ['id','weight', 'price']
 
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,10 +22,12 @@ class ProductImageSerializer(serializers.ModelSerializer):
 class ProductListSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     category = serializers.SerializerMethodField(read_only=True)
+    weights = ProductWeightSerializer(many=True, read_only=True)
+
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'base_price', 'weight', 'images', 'available', 'category', 'coffee_type', 'created_at']
+        fields = ['id', 'name', 'weights', 'images', 'available', 'category', 'coffee_type', 'created_at']
 
     def get_category(self, obj):
         return obj.category.name
@@ -30,6 +36,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 class ProductDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     images = ProductImageSerializer(many=True, read_only=True)
+    weights = ProductWeightSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
@@ -38,7 +45,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             'name',
             'description',
             'coffee_type',
-            'weight',
+            'weights',
             'variety',
             'flavor_notes',
             'origin',
@@ -48,7 +55,6 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             'bitterness',
             'packaging_color',
             'roast_level',
-            'base_price',
             'stock',
             'available',
             'category',

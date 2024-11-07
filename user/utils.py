@@ -98,7 +98,7 @@ def melipayamak_send_sms(phone_number, otp_code):
         response = requests.post(url, json=data)
         response_data = response.json()
         print(response)
-        print(MELIPAYAMAK_API)
+
         
         # بررسی وضعیت ارسال و نمایش پیام در صورت نیاز
         if response.status_code == 200:
@@ -125,7 +125,7 @@ def send_order_notification(user_name, user_phone, order_id):
     url = MELIPAYAMAK_API
     data = {
         "bodyId": 265332,  # bodyId الگوی تأییدشده شما در ملی پیامک
-        "to": '09156599198',
+        "to": '09931394220',
         "args": [user_name, user_phone, order_id]
     }
     
@@ -133,7 +133,7 @@ def send_order_notification(user_name, user_phone, order_id):
         response = requests.post(url, json=data)
         response_data = response.json()
         print(response)
-        print(MELIPAYAMAK_API)
+
         
         # بررسی وضعیت ارسال و نمایش پیام در صورت نیاز
         if response.status_code == 200:

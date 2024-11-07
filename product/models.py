@@ -23,16 +23,10 @@ class Product(models.Model):
         ('ground', 'پودر قهوه'),
     )
 
-    WEIGHT_CHOICES = (
-        ('250g', '۲۵۰ گرم'),
-        ('500g', 'نیم کیلو'),
-        ('1000g', 'یک کیلو'),
-    )
 
     name = models.CharField(max_length=100, verbose_name=_('نام'), db_index=True)
     description = models.TextField(verbose_name=_('توضیحات'), blank=True, null=True)
     coffee_type = models.CharField(max_length=10, choices=COFFEE_TYPE_CHOICES, verbose_name=_('نوع قهوه'))
-    weight = models.CharField(max_length=10, choices=WEIGHT_CHOICES, verbose_name=_('وزن'))
     variety = models.CharField(max_length=100, verbose_name=_('گونه'), blank=True, null=True)
     flavor_notes = models.CharField(max_length=100,verbose_name=_('طعم‌یادها'), blank=True, null=True)
     origin = models.CharField(max_length=100, verbose_name=_('خاستگاه'), blank=True, null=True)
@@ -42,7 +36,6 @@ class Product(models.Model):
     bitterness = models.CharField(max_length=100, verbose_name=_('میزان تلخی'), blank=True, null=True)
     packaging_color = models.CharField(max_length=30, verbose_name=_('رنگ بسته‌بندی'), blank=True, null=True)
     roast_level = models.CharField(max_length=50, verbose_name=_('درجه برشته‌کاری'), blank=True, null=True)
-    base_price = models.DecimalField(max_digits=11, decimal_places=2, verbose_name=_('قیمت پایه'))
     stock = models.PositiveSmallIntegerField(verbose_name=_('موجودی'))
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='products',
                                  verbose_name=_('دسته‌بندی'))
@@ -77,8 +70,18 @@ class Product(models.Model):
         verbose_name_plural = _('محصولات')
 
     def __str__(self):
-        return f"{self.name} - {self.coffee_type} - {self.weight}"
+        return f"{self.name} - {self.coffee_type}"
+    
 
+class ProductWeight(models.Model):
+
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="weights", verbose_name=_('محصول'))
+    weight = models.CharField(max_length=10, verbose_name=_('وزن'))
+    price = models.DecimalField(max_digits=11, decimal_places=2, verbose_name=_('قیمت'))
+
+    def __str__(self):
+        return f"{self.weight} - {self.product.name}"
+    
 
 class ProductImage(models.Model):
     PRIMARY = 'primary'
