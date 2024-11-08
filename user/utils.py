@@ -124,9 +124,9 @@ def send_order_notification(user_name, user_phone, order_id):
     # اطلاعات مورد نیاز برای ارسال پیامک
     url = MELIPAYAMAK_API
     data = {
-        "bodyId": 265332,  # bodyId الگوی تأییدشده شما در ملی پیامک
-        "to": '09931394220',
-        "args": [user_name, user_phone, order_id]
+        "bodyId": 265613, 
+        "to": '09156599198',
+        "args": [str(user_name), str(user_phone), str(order_id)]
     }
     
     try:

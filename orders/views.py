@@ -185,25 +185,25 @@ class OrderCreateView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         user = request.user
-        print("کاربر دریافت شد:", user)
+
         cart_items = CartItem.objects.filter(cart__user=user)
-        print("آیتم‌های سبد خرید:", cart_items)
+
 
         if not cart_items.exists():
-            print("سبد خرید خالی است.")
+
             return Response({"error": "سبد خرید خالی است."}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(data=request.data)
-        print("داده‌های دریافتی:", request.data)
+
 
         order_id = request.data.get('id')
         if order_id and Order.objects.filter(id=order_id).exists():
-            print("سفارش قبلاً ثبت شده است.")
+
             return Response({"error": "سفارش شما قبلاً ثبت شده است."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             serializer.is_valid(raise_exception=True)
-            print("داده‌های اعتبارسنجی شده:", serializer.validated_data)
+
 
             # محاسبه قیمت نهایی
             total_price = 0
@@ -213,10 +213,10 @@ class OrderCreateView(generics.CreateAPIView):
                 if product_weight:
                     total_price += product_weight.price * item.quantity
                 else:
-                    print("وزن محصول یافت نشد برای محصول:", item.product)
+
                     return Response({"error": "وزن محصول برای یکی از محصولات یافت نشد."}, status=status.HTTP_400_BAD_REQUEST)
 
-            print("قیمت کل محاسبه شده:", total_price)
+
 
             # 3. ایجاد سفارش جدید
             order = Order.objects.create(
@@ -226,7 +226,7 @@ class OrderCreateView(generics.CreateAPIView):
                 shipping_method=serializer.validated_data['shipping_method'],
                 total_price=total_price
             )
-            print("سفارش جدید ایجاد شد:", order)
+
 
             # 4. ایجاد آیتم‌های سفارش
             for item in cart_items:
@@ -238,22 +238,22 @@ class OrderCreateView(generics.CreateAPIView):
                         quantity=item.quantity,
                         price=product_weight.price
                     )
-                    print("آیتم سفارش ایجاد شد برای محصول:", item.product)
+
                 else:
-                    print("وزن محصول یافت نشد برای محصول:", item.product)
+
                     return Response({"error": "وزن محصول برای یکی از محصولات یافت نشد."}, status=status.HTTP_400_BAD_REQUEST)
 
             user.carts.last().delete()
-            print("سبد خرید حذف شد.")
+
 
             order_data = OrderSerializer(order).data
-            print("اطلاعات سفارش بازگشتی:", order_data)
+
             send_order_notification(order.user.name, order.user.phone_number, order.id)
 
             return Response(order_data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            print("خطا در ایجاد سفارش:", str(e))
+
             return Response({"error": f"خطا در ایجاد سفارش: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
